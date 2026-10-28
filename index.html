@@ -95,6 +95,18 @@ select{width:100%;font:500 15px Manrope,sans-serif;color:var(--tx);background:va
 .sw{display:flex;gap:14px;flex-wrap:wrap}.sw div{text-align:center}.sw button{width:50px;height:50px;border-radius:50%;border:3px solid transparent;cursor:pointer;display:block;margin:0 auto 4px;transition:transform .25s cubic-bezier(.3,1.6,.5,1),border-color .2s}.sw button.on{border-color:var(--tx);transform:scale(1.12)}.sw small{color:var(--mute);font-size:12px}
 .fc{perspective:800px;height:150px;cursor:pointer;position:relative;margin-bottom:10px}.ff{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:16px;border-radius:20px;background:var(--card);border:1px solid var(--line);backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .6s cubic-bezier(.3,1.2,.4,1)}.ff p{margin:0;font-weight:700;font-size:17px}.fb{transform:rotateY(180deg);background:linear-gradient(135deg,color-mix(in srgb,var(--a) 55%,transparent),color-mix(in srgb,var(--b) 45%,transparent))}.fc.fl .ff:first-child{transform:rotateY(180deg)}.fc.fl .fb{transform:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#tk .tkl{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--mute);font-weight:700}
+#tk .tkl[hidden],#tk .tke[hidden],#tk #tkR[hidden]{display:none}
+#tk .tkl i{width:18px;height:18px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--b);animation:tkspin .8s linear infinite}
+@keyframes tkspin{to{transform:rotate(360deg)}}
+#tk .tke{margin:12px 0 0;color:#ff6b7a;font-weight:700;word-break:break-word}
+#tk .tkv{margin-top:14px;border-radius:16px;overflow:hidden;background:#000;display:flex;justify-content:center}
+#tk .tkv video,#tk .tkv img{display:block;width:100%;max-height:420px;object-fit:contain;background:#000}
+#tk .tkt{margin:12px 0 2px;font-weight:700;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+#tk .tkm{color:var(--mute);font-size:13px;margin:0 0 4px;word-break:break-word}
+#tk .tka{display:grid;gap:10px;margin-top:12px}
+#tk .tka a{display:block;text-align:center;text-decoration:none}
+#tk .tkn{color:var(--mute);font-size:12px;margin:10px 0 0}
 </style>
 </head>
 <body>
@@ -140,7 +152,7 @@ select{width:100%;font:500 15px Manrope,sans-serif;color:var(--tx);background:va
  <div class='card tool'><button onclick='tgl(this)'>Nilai rapor dan mapel prioritas<span>+</span></button><div><input id='kk' type='number' inputmode='decimal' placeholder='KKM (kosongkan untuk 75)' oninput='nres()'><div id='nin'></div><div class='card' id='nr' style='margin-top:10px'>Isi nilai untuk melihat hasil.</div></div></div>
  <div class='card tool'><button onclick='tgl(this)'>Target masuk SMA<span>+</span></button><div><p class='sub' style='margin:0 0 10px'>Nilai minimal tiap sekolah berubah tiap tahun dan beda per jalur, jadi cek info resmi PPDB.</p><input id='ms' type='number' inputmode='decimal' placeholder='Nilai rata-rata kamu' oninput='sma()'><button class='btn ghost' style='width:100%;margin-bottom:10px' onclick='smaR()'>Ambil dari nilai rapor</button><input id='sn2' placeholder='Nama SMA incaran'><input id='sm2' type='number' inputmode='decimal' placeholder='Nilai minimal sekolah itu'><button class='btn' style='width:100%' onclick='smaA()'>Tambah sekolah</button><div id='sl' style='margin-top:8px'></div></div></div>
 </section>
-<section class='page' id='p5'><h2>Nonton</h2><div class='card soon' style='text-align:center;padding:44px 20px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur nonton anime.</p></div><div class='card soon' style='text-align:center;padding:44px 20px;margin-top:14px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur putar lagu Spotify.</p></div><div class='card soon' style='text-align:center;padding:44px 20px;margin-top:14px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur download TikTok tanpa watermark.</p></div><div class='card show' style='margin-bottom:18px'><b>Pemutar YouTube</b><p class='sub' style='margin:8px 0 12px'>Tempel link video, lalu tekan Tampilkan Video.</p><input id='yi' placeholder='Tempel link YouTube (watch, youtu.be, shorts, live)'><button class='btn' style='width:100%' onclick='ytp()'>Tampilkan Video</button><p id='ye' class='sub' style='margin:10px 0 0;display:none;color:#ff6b7a'></p><div id='yw' style='margin-top:14px;display:none;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000'></div></div><p style='margin:0 0 10px'><b>Anime</b></p><div class='grid2' id='an'></div><p style='margin:22px 0 10px'><b>Video belajar</b></p><div class='grid2' id='vb'></div><p style='margin:22px 0 10px'><b>Musik fokus</b></p><div class='grid2' id='mf'></div></section>
+<section class='page' id='p5'><h2>Nonton</h2><div class='card soon' style='text-align:center;padding:44px 20px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur nonton anime.</p></div><div class='card soon' style='text-align:center;padding:44px 20px;margin-top:14px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur putar lagu Spotify.</p></div><div class='card show' id='tk' style='margin-top:14px'><b style='font:800 18px Unbounded,sans-serif'>TikTok Downloader</b><p class='sub' style='margin:8px 0 12px'>Tempel link video TikTok, lalu tekan Download. Hanya untuk video milikmu atau yang kamu punya izinnya.</p><input id='tkI' type='url' inputmode='url' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='https://www.tiktok.com/@user/video/...'><div class='grid2'><button class='btn' id='tkGo' type='button'>Download</button><button class='btn ghost' id='tkClr' type='button'>Hapus</button></div><div id='tkL' class='tkl' hidden><i></i><span>Memproses link...</span></div><p id='tkE' class='tke' role='alert' hidden></p><div id='tkR' hidden></div></div><div class='card show' style='margin-bottom:18px'><b>Pemutar YouTube</b><p class='sub' style='margin:8px 0 12px'>Tempel link video, lalu tekan Tampilkan Video.</p><input id='yi' placeholder='Tempel link YouTube (watch, youtu.be, shorts, live)'><button class='btn' style='width:100%' onclick='ytp()'>Tampilkan Video</button><p id='ye' class='sub' style='margin:10px 0 0;display:none;color:#ff6b7a'></p><div id='yw' style='margin-top:14px;display:none;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000'></div></div><p style='margin:0 0 10px'><b>Anime</b></p><div class='grid2' id='an'></div><p style='margin:22px 0 10px'><b>Video belajar</b></p><div class='grid2' id='vb'></div><p style='margin:22px 0 10px'><b>Musik fokus</b></p><div class='grid2' id='mf'></div></section>
 </main>
 <nav class="dock" id="dk"><span class="pill" id="pl"></span></nav>
 <div class="sheetbg" id="sb" onclick="cs()"></div>
@@ -347,6 +359,78 @@ $('#uc').innerHTML=Object.keys(U).map(k=>`<option>${k}</option>`).join('');ucs()
 const R=[['Luas lingkaran','πr²'],['Keliling lingkaran','2πr'],['Volume tabung','πr²t'],['Luas selimut tabung','2πrt'],['Volume kerucut','⅓πr²t'],['Volume bola','4/3 πr³'],['Luas bola','4πr²'],['Peluang','n(A) / n(S)'],['Kecepatan','v = s / t'],['Hukum Ohm','V = I × R'],['Gaya','F = m × a'],['Tekanan','P = F / A']];
 $('#rm').innerHTML=R.map(r=>`<div class='bab' style='cursor:default'><span style='flex:1;opacity:1;text-decoration:none'>${r[0]}</span><b>${r[1]}</b></div>`).join('');
 applyTheme();home();notes();todo();jad();fshow();applyDur();nin();sma();ku();nonton();mui();go(0);
+
+/* ===== TikTok Downloader (scoped, tidak mengubah fitur lain) ===== */
+(function(){
+const el=id=>document.getElementById(id);
+const inp=el('tkI'),go=el('tkGo'),clr=el('tkClr'),ld=el('tkL'),er=el('tkE'),rs=el('tkR');
+if(!inp||!go||!clr)return;
+let ctl=null,busy=false;
+const OK_HOST=/^(www\.|m\.|vm\.|vt\.)?tiktok\.com$/i;
+function parse(v){v=(v||'').trim();if(!v||v.length>500)return null;if(!/^https?:\/\//i.test(v))v='https://'+v;try{const u=new URL(v);return OK_HOST.test(u.hostname)?u:null}catch(e){return null}}
+function showErr(m){er.textContent=m;er.hidden=false}
+function stopVideo(){const v=rs.querySelector('video');if(v){try{v.pause();v.removeAttribute('src');v.load()}catch(e){}}}
+function reset(){stopVideo();rs.hidden=true;rs.textContent='';er.hidden=true;er.textContent='';ld.hidden=true}
+function setBusy(b){busy=b;go.disabled=b;go.style.opacity=b?.6:1;go.textContent=b?'Memproses...':'Download';ld.hidden=!b}
+function fmtDur(s){s=Math.round(+s||0);if(!s)return'';return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function fmtN(n){n=+n;if(!isFinite(n)||n<0)return null;try{return new Intl.NumberFormat('id-ID',{notation:'compact',maximumFractionDigits:1}).format(n)}catch(e){return String(n)}}
+const API='/api/tiktok';
+function render(d){
+ rs.textContent='';const v=d.video||{};
+ const box=document.createElement('div');box.className='tkv';
+ if(d.previewToken){
+  const vd=document.createElement('video');vd.controls=true;vd.playsInline=true;vd.preload='metadata';
+  if(v.cover){vd.poster=v.cover}
+  vd.src=API+'?t='+encodeURIComponent(d.previewToken);
+  vd.addEventListener('error',()=>{const n=rs.querySelector('.tkn');if(n)n.textContent='Preview tidak bisa dimuat, tapi tombol unduh tetap bisa dicoba.'},{once:true});
+  box.appendChild(vd);
+ }else if(v.cover){
+  const im=document.createElement('img');im.alt='Thumbnail video';im.referrerPolicy='no-referrer';im.src=v.cover;box.appendChild(im);
+ }
+ if(box.firstChild)rs.appendChild(box);
+ if(v.title){const t=document.createElement('p');t.className='tkt';t.textContent=v.title;rs.appendChild(t)}
+ const meta=[];
+ if(v.author&&(v.author.name||v.author.user))meta.push((v.author.name||'')+(v.author.user?' (@'+v.author.user+')':''));
+ const du=fmtDur(v.duration);if(du)meta.push('Durasi '+du);
+ const s=v.stats||{};[['plays','tayangan'],['likes','suka']].forEach(([k,l])=>{const n=fmtN(s[k]);if(n)meta.push(n+' '+l)});
+ if(meta.length){const m=document.createElement('p');m.className='tkm';m.textContent=meta.join(' · ');rs.appendChild(m)}
+ const acts=document.createElement('div');acts.className='tka';
+ const add=(obj,label,primary)=>{if(!obj)return;const a=document.createElement('a');a.className='btn'+(primary?'':' ghost');a.textContent=label;
+  if(obj.token){a.href=API+'?t='+encodeURIComponent(obj.token)+'&dl=1';a.setAttribute('download','')}
+  else if(obj.direct){a.href=obj.direct;a.target='_blank';a.rel='noopener noreferrer'}
+  else return;acts.appendChild(a)};
+ add(d.sd,'Unduh video (tanpa watermark)',true);
+ add(d.hd,'Unduh HD',!d.sd);
+ if(acts.firstChild)rs.appendChild(acts);
+ const n=document.createElement('p');n.className='tkn';
+ n.textContent=d.proxy?'Status watermark mengikuti sumber unduhan pihak ketiga.':'Mode cadangan: file dibuka langsung dari sumber, lalu simpan manual dari pemutar.';
+ rs.appendChild(n);
+ rs.hidden=false;
+}
+async function run(){
+ if(busy)return;
+ reset();
+ const u=parse(inp.value);
+ if(!u){showErr('Link tidak valid. Tempel link video TikTok, contoh: https://www.tiktok.com/@user/video/1234567890 atau https://vm.tiktok.com/xxxx');return}
+ if(ctl)ctl.abort();ctl=new AbortController();const my=ctl;
+ setBusy(true);
+ try{
+  const r=await fetch(API+'?url='+encodeURIComponent(u.toString()),{signal:my.signal,headers:{accept:'application/json'}});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(my!==ctl)return;
+  if(!j){showErr(r.status===404?'Backend belum aktif. Fitur ini hanya jalan setelah api/tiktok.js ikut ter-deploy di Vercel.':'Server memberi respons yang tidak bisa dibaca. Coba lagi.');return}
+  if(!r.ok||!j.ok){showErr(j.error||'Gagal memproses link.');return}
+  render(j);
+ }catch(e){
+  if(e&&e.name==='AbortError')return;
+  showErr(navigator.onLine===false?'Kamu sedang offline. Sambungkan internet lalu coba lagi.':'Tidak bisa menghubungi server. Coba lagi sebentar lagi.');
+ }finally{if(my===ctl)setBusy(false)}
+}
+function clearAll(){if(ctl){ctl.abort();ctl=null}setBusy(false);inp.value='';reset();inp.focus()}
+go.addEventListener('click',run);
+clr.addEventListener('click',clearAll);
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();run()}});
+})();
 </script>
 </body>
 </html>
