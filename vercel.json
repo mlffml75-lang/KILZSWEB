@@ -1,0 +1,5 @@
+{
+  "functions": {
+    "api/tiktok.js": { "maxDuration": 30 }
+  }
+}
