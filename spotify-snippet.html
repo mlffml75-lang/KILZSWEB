@@ -1,0 +1,122 @@
+<!-- ============ SNIPPET SPOTIFY SEARCH (untuk merge manual jika index.html kamu beda) ============
+
+LANGKAH 1 (HTML): di index.html, di dalam <section id='p5'>, cari card placeholder:
+  <div class='card soon' ...>...Fitur putar lagu Spotify.</p></div>
+  lalu GANTI seluruh card itu dengan blok "BLOK 1" di bawah.
+
+LANGKAH 2 (CSS): tempel "BLOK 2" tepat SEBELUM tag penutup </style>.
+
+LANGKAH 3 (JS): tempel "BLOK 3" tepat SEBELUM tag penutup </script> terakhir (yang paling bawah).
+================================================================================================= -->
+
+<!-- ========== BLOK 1 (HTML) ========== -->
+<div class='card show' id='sp' style='margin-top:14px'><b style='font:800 18px Unbounded,sans-serif'>Spotify Search</b><p class='sub' style='margin:8px 0 12px'>Cari lagu berdasarkan judul atau nama artis, lalu putar lewat pemutar resmi Spotify.</p><div class='spf'><input id='spI' type='search' enterkeyhint='search' maxlength='100' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='Judul lagu atau nama artis' aria-label='Cari lagu'><button class='spb' id='spGo' type='button'>Cari</button></div><div id='spL' class='spl' hidden><i></i><span>Mencari lagu...</span></div><p id='spE' class='spe' role='alert' hidden></p><div id='spP' class='spp' hidden></div><div id='spR' class='spr'></div><div class='spa'><button class='btn ghost' id='spMore' type='button' hidden>Muat lebih banyak</button><button class='btn ghost' id='spClr' type='button' hidden>Hapus hasil</button></div><p class='spn' id='spN' hidden>Pemutar resmi Spotify. Pemutaran penuh tergantung akun Spotify yang sedang login di browser kamu.</p></div>
+
+<!-- ========== BLOK 2 (CSS, tempel sebelum </style>) ========== -->
+<style>
+/* Spotify Search (scoped ke #sp) */
+#sp{--sp1:#ff3d4a;--sp2:#ff9a3d}
+#sp [hidden]{display:none!important}
+#sp .spf{display:flex;gap:10px;align-items:flex-start}
+#sp .spf input{margin:0;flex:1;min-width:0}
+#sp .spb{flex:0 0 auto;font:700 14px Manrope,sans-serif;border:0;border-radius:16px;padding:14px 20px;color:#fff;background:linear-gradient(135deg,var(--sp1),var(--sp2));cursor:pointer;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+#sp .spb:active{transform:scale(.94)}
+#sp .spb:disabled{opacity:.6;cursor:default}
+#sp .spl{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--mute);font-weight:700}
+#sp .spl i{width:18px;height:18px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--sp1);animation:spspin .8s linear infinite}
+@keyframes spspin{to{transform:rotate(360deg)}}
+#sp .spe{margin:12px 0 0;color:#ff6b7a;font-weight:700;word-break:break-word}
+#sp .spp{margin-top:14px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#000}
+#sp .spp iframe{display:block;width:100%;height:152px;border:0}
+#sp .spr{margin-top:12px;display:grid;gap:10px}
+#sp .spt{display:flex;align-items:center;gap:12px;padding:10px;border-radius:18px;background:var(--card);border:1px solid var(--line);transition:border-color .2s}
+#sp .spt.on{border-color:var(--sp1);background:linear-gradient(135deg,color-mix(in srgb,var(--sp1) 14%,transparent),color-mix(in srgb,var(--sp2) 14%,transparent))}
+#sp .spc{flex:0 0 56px;width:56px;height:56px;border-radius:12px;object-fit:cover;background:linear-gradient(135deg,var(--sp1),var(--sp2));display:block}
+#sp .spi{flex:1;min-width:0}
+#sp .spi b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp .spi small{display:block;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sp .spx{flex:0 0 auto;display:flex;gap:8px}
+#sp .spx button,#sp .spx a{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--tx);display:grid;place-items:center;cursor:pointer;text-decoration:none;padding:0}
+#sp .spx button{border:0;color:#fff;background:linear-gradient(135deg,var(--sp1),var(--sp2))}
+#sp .spx svg{width:18px;height:18px;fill:currentColor}
+#sp .spx a svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#sp .spx button:active,#sp .spx a:active{transform:scale(.9)}
+#sp .spa{display:grid;gap:10px;margin-top:12px}
+#sp .spa .btn{width:100%}
+#sp .spn{color:var(--mute);font-size:12px;margin:12px 0 0}
+#sp .spz{color:var(--mute);text-align:center;padding:14px 0 4px;margin:0}
+</style>
+
+<!-- ========== BLOK 3 (JS, tempel sebelum </script> terakhir) ========== -->
+<script>
+/* ===== Spotify Search (scoped, tidak mengubah fitur lain) ===== */
+(function(){
+const g=id=>document.getElementById(id);
+const inp=g('spI'),go=g('spGo'),ld=g('spL'),er=g('spE'),pl=g('spP'),rs=g('spR'),more=g('spMore'),clr=g('spClr'),nt=g('spN');
+if(!inp||!go||!rs)return;
+const API='/api/spotify',ID=/^[A-Za-z0-9]{22}$/;
+let ctl=null,busy=false,term='',next=0,sel=null;
+const NS='http://www.w3.org/2000/svg';
+function ico(d,fill){const s=document.createElementNS(NS,'svg');s.setAttribute('viewBox','0 0 24 24');s.setAttribute('aria-hidden','true');const p=document.createElementNS(NS,'path');p.setAttribute('d',d);s.appendChild(p);return s}
+const PLAY='M7 4.5v15l13-7.5z',EXT='M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5';
+function showErr(m){er.textContent=m;er.hidden=false}
+function fmtDur(ms){const s=Math.round((+ms||0)/1000);return s?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):''}
+function setBusy(b){busy=b;go.disabled=b;go.textContent=b?'Mencari...':'Cari';ld.hidden=!b;if(more)more.disabled=b}
+function closePlayer(){pl.textContent='';pl.hidden=true;sel=null;rs.querySelectorAll('.spt.on').forEach(x=>x.classList.remove('on'))}
+function openPlayer(t,row){
+ if(!ID.test(t.id))return;
+ rs.querySelectorAll('.spt.on').forEach(x=>x.classList.remove('on'));row.classList.add('on');sel=t.id;
+ pl.textContent='';
+ const f=document.createElement('iframe');
+ f.src='https://open.spotify.com/embed/track/'+t.id+'?utm_source=generator';
+ f.title='Pemutar Spotify: '+t.name;f.loading='lazy';
+ f.setAttribute('allow','autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
+ pl.appendChild(f);pl.hidden=false;nt.hidden=false;
+ pl.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function row(t){
+ const d=document.createElement('div');d.className='spt';
+ const c=document.createElement('img');c.className='spc';c.alt='';c.loading='lazy';c.decoding='async';c.referrerPolicy='no-referrer';
+ if(t.cover)c.src=t.cover;else c.removeAttribute('src');
+ c.addEventListener('error',()=>{c.removeAttribute('src')},{once:true});
+ const i=document.createElement('div');i.className='spi';
+ const b=document.createElement('b');b.textContent=t.name||'(Tanpa judul)';
+ const s=document.createElement('small');s.textContent=(t.artists||'Artis tidak diketahui')+(t.explicit?' · E':'');
+ const s2=document.createElement('small');s2.textContent=[t.album,fmtDur(t.durationMs)].filter(Boolean).join(' · ');
+ i.append(b,s);if(s2.textContent)i.appendChild(s2);
+ const x=document.createElement('div');x.className='spx';
+ const pb=document.createElement('button');pb.type='button';pb.setAttribute('aria-label','Putar '+t.name);pb.appendChild(ico(PLAY));
+ pb.addEventListener('click',()=>openPlayer(t,d));
+ const a=document.createElement('a');a.href=t.url;a.target='_blank';a.rel='noopener noreferrer';a.setAttribute('aria-label','Buka di Spotify');a.appendChild(ico(EXT));
+ x.append(pb,a);d.append(c,i,x);return d;
+}
+function addAll(list){const fr=document.createDocumentFragment();list.forEach(t=>fr.appendChild(row(t)));rs.appendChild(fr)}
+async function load(append){
+ if(busy)return;
+ const q=append?term:inp.value.replace(/\s+/g,' ').trim();
+ er.hidden=true;er.textContent='';
+ if(!q){showErr('Ketik judul lagu atau nama artis dulu.');inp.focus();return}
+ if(q.length>100){showErr('Kata kunci terlalu panjang (maksimal 100 karakter).');return}
+ if(!append){term=q;next=0;rs.textContent='';more.hidden=true;closePlayer()}
+ if(ctl)ctl.abort();ctl=new AbortController();const my=ctl;
+ setBusy(true);
+ try{
+  const r=await fetch(API+'?q='+encodeURIComponent(q)+(next?'&offset='+next:''),{signal:my.signal,headers:{accept:'application/json'}});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(my!==ctl)return;
+  if(!j){showErr(r.status===404?'Backend belum aktif. Pastikan api/spotify.js ikut ter-deploy di Vercel.':'Server memberi respons yang tidak bisa dibaca. Coba lagi.');return}
+  if(!r.ok||!j.ok){showErr(j.error||'Pencarian gagal. Coba lagi.');return}
+  if(!append&&!j.tracks.length){const p=document.createElement('p');p.className='spz';p.textContent='Tidak ada lagu untuk "'+q+'". Coba kata kunci lain.';rs.appendChild(p);clr.hidden=false;return}
+  addAll(j.tracks);next=j.nextOffset;more.hidden=!j.hasMore;clr.hidden=false;
+ }catch(e){
+  if(e&&e.name==='AbortError')return;
+  showErr(navigator.onLine===false?'Kamu sedang offline. Sambungkan internet lalu coba lagi.':'Tidak bisa menghubungi server. Coba lagi sebentar lagi.');
+ }finally{if(my===ctl)setBusy(false)}
+}
+function clearAll(){if(ctl){ctl.abort();ctl=null}setBusy(false);term='';next=0;inp.value='';er.hidden=true;er.textContent='';rs.textContent='';closePlayer();nt.hidden=true;more.hidden=true;clr.hidden=true;inp.focus()}
+go.addEventListener('click',()=>load(false));
+more.addEventListener('click',()=>load(true));
+clr.addEventListener('click',clearAll);
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();load(false)}});
+})();
+</script>
