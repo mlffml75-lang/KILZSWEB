@@ -138,6 +138,46 @@ select{width:100%;font:500 15px Manrope,sans-serif;color:var(--tx);background:va
 #sp .spa .btn{width:100%}
 #sp .spn{color:var(--mute);font-size:12px;margin:12px 0 0}
 #sp .spz{color:var(--mute);text-align:center;padding:14px 0 4px;margin:0}
+/* YouTube Search (scoped ke #yt) */
+#yt [hidden]{display:none!important}
+#yt .ytab{display:flex;gap:8px;margin:12px 0 14px;padding:4px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+#yt .ytab button{flex:1;font:700 13px Manrope,sans-serif;border:0;border-radius:12px;padding:10px 8px;color:var(--mute);background:transparent;cursor:pointer}
+#yt .ytab button.on{color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+#yt .ytf{display:flex;gap:10px;align-items:flex-start}
+#yt .ytf input{margin:0;flex:1;min-width:0}
+#yt .ytb{flex:0 0 auto;font:700 14px Manrope,sans-serif;border:0;border-radius:16px;padding:14px 20px;color:#fff;background:linear-gradient(135deg,var(--a),var(--b));cursor:pointer;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+#yt .ytb:active{transform:scale(.94)}
+#yt .ytb:disabled{opacity:.6;cursor:default}
+#yt .ytc{display:flex;gap:8px;overflow-x:auto;margin:12px -2px 0;padding:2px;scrollbar-width:none}
+#yt .ytc::-webkit-scrollbar{display:none}
+#yt .ytc button{flex:0 0 auto;font:700 13px Manrope,sans-serif;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer}
+#yt .ytc button.on{border-color:transparent;color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+#yt .yto{display:flex;align-items:center;gap:10px;margin-top:12px;color:var(--mute);font-weight:700;font-size:13px}
+#yt .yto select{width:auto;margin:0;padding:9px 12px;border-radius:14px;font-size:13px}
+#yt .ytl{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--mute);font-weight:700}
+#yt .ytl i{width:18px;height:18px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--a);animation:ytspin .8s linear infinite}
+@keyframes ytspin{to{transform:rotate(360deg)}}
+#yt .yte{margin:12px 0 0;color:#ff6b7a;font-weight:700;word-break:break-word}
+#yt .ytp{margin-top:14px}
+#yt .ytpb{margin-bottom:10px}
+#yt .ytpb .btn{padding:10px 14px}
+#yt .ytw{aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000}
+#yt .ytw iframe{width:100%;height:100%;border:0;display:block}
+#yt .ytpt{display:block;margin-top:12px;word-break:break-word}
+#yt .ytpc{margin:4px 0 0;color:var(--mute);font-size:13px}
+#yt .ytpl{display:inline-block;margin-top:10px;font-weight:700;color:var(--a);text-decoration:none}
+#yt .ytg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:14px}
+#yt .ytv{display:block;width:100%;text-align:left;padding:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--card);color:var(--tx);cursor:pointer;font:inherit;transition:transform .2s cubic-bezier(.3,1.5,.5,1),border-color .2s}
+#yt .ytv:active{transform:scale(.97)}
+#yt .ytv:hover{border-color:var(--a)}
+#yt .ytv .th{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,var(--a),var(--b))}
+#yt .ytv .th img{width:100%;height:100%;object-fit:cover;display:block}
+#yt .ytv .lv{position:absolute;left:8px;bottom:8px;font:800 11px Manrope,sans-serif;color:#fff;background:#e5322d;border-radius:6px;padding:3px 7px}
+#yt .ytv .bd{padding:10px 12px 12px}
+#yt .ytv .tt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:700;font-size:14px;line-height:1.35;word-break:break-word}
+#yt .ytv .ch{display:block;margin-top:6px;color:var(--mute);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#yt .ytz{grid-column:1/-1;color:var(--mute);text-align:center;margin:0;padding:10px 0}
+#yt #ytMore{width:100%;margin-top:14px}
 </style>
 </head>
 <body>
@@ -183,7 +223,7 @@ select{width:100%;font:500 15px Manrope,sans-serif;color:var(--tx);background:va
  <div class='card tool'><button onclick='tgl(this)'>Nilai rapor dan mapel prioritas<span>+</span></button><div><input id='kk' type='number' inputmode='decimal' placeholder='KKM (kosongkan untuk 75)' oninput='nres()'><div id='nin'></div><div class='card' id='nr' style='margin-top:10px'>Isi nilai untuk melihat hasil.</div></div></div>
  <div class='card tool'><button onclick='tgl(this)'>Target masuk SMA<span>+</span></button><div><p class='sub' style='margin:0 0 10px'>Nilai minimal tiap sekolah berubah tiap tahun dan beda per jalur, jadi cek info resmi PPDB.</p><input id='ms' type='number' inputmode='decimal' placeholder='Nilai rata-rata kamu' oninput='sma()'><button class='btn ghost' style='width:100%;margin-bottom:10px' onclick='smaR()'>Ambil dari nilai rapor</button><input id='sn2' placeholder='Nama SMA incaran'><input id='sm2' type='number' inputmode='decimal' placeholder='Nilai minimal sekolah itu'><button class='btn' style='width:100%' onclick='smaA()'>Tambah sekolah</button><div id='sl' style='margin-top:8px'></div></div></div>
 </section>
-<section class='page' id='p5'><h2>Nonton</h2><div class='card soon' style='text-align:center;padding:44px 20px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur nonton anime.</p></div><div class='card show' id='sp' style='margin-top:14px'><b style='font:800 18px Unbounded,sans-serif'>Spotify Search</b><p class='sub' style='margin:8px 0 12px'>Cari lagu berdasarkan judul atau nama artis, lalu putar lewat pemutar resmi Spotify.</p><div class='spf'><input id='spI' type='search' enterkeyhint='search' maxlength='100' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='Judul lagu atau nama artis' aria-label='Cari lagu'><button class='spb' id='spGo' type='button'>Cari</button></div><div id='spL' class='spl' hidden><i></i><span>Mencari lagu...</span></div><p id='spE' class='spe' role='alert' hidden></p><div id='spP' class='spp' hidden></div><div id='spR' class='spr'></div><div class='spa'><button class='btn ghost' id='spMore' type='button' hidden>Muat lebih banyak</button><button class='btn ghost' id='spClr' type='button' hidden>Hapus hasil</button></div><p class='spn' id='spN' hidden>Pemutar resmi Spotify. Pemutaran penuh tergantung akun Spotify yang sedang login di browser kamu.</p></div><div class='card show' id='tk' style='margin-top:14px'><b style='font:800 18px Unbounded,sans-serif'>TikTok Downloader</b><p class='sub' style='margin:8px 0 12px'>Tempel link video TikTok, lalu tekan Download. Hanya untuk video milikmu atau yang kamu punya izinnya.</p><input id='tkI' type='url' inputmode='url' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='https://www.tiktok.com/@user/video/...'><div class='grid2'><button class='btn' id='tkGo' type='button'>Download</button><button class='btn ghost' id='tkClr' type='button'>Hapus</button></div><div id='tkL' class='tkl' hidden><i></i><span>Memproses link...</span></div><p id='tkE' class='tke' role='alert' hidden></p><div id='tkR' hidden></div></div><div class='card show' style='margin-bottom:18px'><b>Pemutar YouTube</b><p class='sub' style='margin:8px 0 12px'>Tempel link video, lalu tekan Tampilkan Video.</p><input id='yi' placeholder='Tempel link YouTube (watch, youtu.be, shorts, live)'><button class='btn' style='width:100%' onclick='ytp()'>Tampilkan Video</button><p id='ye' class='sub' style='margin:10px 0 0;display:none;color:#ff6b7a'></p><div id='yw' style='margin-top:14px;display:none;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000'></div></div><p style='margin:0 0 10px'><b>Anime</b></p><div class='grid2' id='an'></div><p style='margin:22px 0 10px'><b>Video belajar</b></p><div class='grid2' id='vb'></div><p style='margin:22px 0 10px'><b>Musik fokus</b></p><div class='grid2' id='mf'></div></section>
+<section class='page' id='p5'><h2>Nonton</h2><div class='card soon' style='text-align:center;padding:44px 20px'><b style='font:800 22px Unbounded,sans-serif'>Will update soon</b><p class='sub' style='margin:12px 0 0'>Fitur nonton anime.</p></div><div class='card show' id='sp' style='margin-top:14px'><b style='font:800 18px Unbounded,sans-serif'>Spotify Search</b><p class='sub' style='margin:8px 0 12px'>Cari lagu berdasarkan judul atau nama artis, lalu putar lewat pemutar resmi Spotify.</p><div class='spf'><input id='spI' type='search' enterkeyhint='search' maxlength='100' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='Judul lagu atau nama artis' aria-label='Cari lagu'><button class='spb' id='spGo' type='button'>Cari</button></div><div id='spL' class='spl' hidden><i></i><span>Mencari lagu...</span></div><p id='spE' class='spe' role='alert' hidden></p><div id='spP' class='spp' hidden></div><div id='spR' class='spr'></div><div class='spa'><button class='btn ghost' id='spMore' type='button' hidden>Muat lebih banyak</button><button class='btn ghost' id='spClr' type='button' hidden>Hapus hasil</button></div><p class='spn' id='spN' hidden>Pemutar resmi Spotify. Pemutaran penuh tergantung akun Spotify yang sedang login di browser kamu.</p></div><div class='card show' id='tk' style='margin-top:14px'><b style='font:800 18px Unbounded,sans-serif'>TikTok Downloader</b><p class='sub' style='margin:8px 0 12px'>Tempel link video TikTok, lalu tekan Download. Hanya untuk video milikmu atau yang kamu punya izinnya.</p><input id='tkI' type='url' inputmode='url' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='https://www.tiktok.com/@user/video/...'><div class='grid2'><button class='btn' id='tkGo' type='button'>Download</button><button class='btn ghost' id='tkClr' type='button'>Hapus</button></div><div id='tkL' class='tkl' hidden><i></i><span>Memproses link...</span></div><p id='tkE' class='tke' role='alert' hidden></p><div id='tkR' hidden></div></div><div class='card show' id='yt' style='margin-bottom:18px'><b>Pemutar YouTube</b><div class='ytab' role='tablist'><button type='button' id='ytT1' class='on' role='tab' aria-selected='true'>Cari Video</button><button type='button' id='ytT2' role='tab' aria-selected='false'>Putar lewat Link</button></div><div id='ytS'><div class='ytf'><input id='ytQ' type='search' enterkeyhint='search' maxlength='100' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='Judul video, nama channel, atau kata kunci' aria-label='Cari video YouTube'><button class='ytb' id='ytGo' type='button'>Cari</button></div><div class='ytc' id='ytCh' role='group' aria-label='Kategori'><button type='button' class='on' data-c=''>Semua</button><button type='button' data-c='music'>Musik</button><button type='button' data-c='gaming'>Gaming</button><button type='button' data-c='news'>Berita</button><button type='button' data-c='sports'>Olahraga</button><button type='button' data-c='education'>Pendidikan</button><button type='button' data-c='entertainment'>Hiburan</button></div><label class='yto'>Urutkan<select id='ytO'><option value='relevance'>Relevansi</option><option value='date'>Terbaru</option><option value='viewCount'>Paling banyak ditonton</option></select></label><div id='ytL' class='ytl' hidden><i></i><span>Mencari video...</span></div><p id='ytE' class='yte' role='alert' hidden></p><div id='ytP' class='ytp' hidden><div class='ytpb'><button type='button' class='btn ghost' id='ytBack'>&#8592; Kembali ke hasil</button></div><div class='ytw' id='ytW'></div><b class='ytpt' id='ytPt'></b><p class='ytpc' id='ytPc'></p><p class='yte' id='ytPm' role='alert' hidden></p><a class='ytpl' id='ytPl' target='_blank' rel='noopener noreferrer'>Tonton di YouTube</a></div><div class='ytg' id='ytR'></div><button type='button' class='btn ghost' id='ytMore' hidden>Muat lebih banyak</button></div><div id='ytK' hidden><p class='sub' style='margin:8px 0 12px'>Tempel link video, lalu tekan Tampilkan Video.</p><input id='yi' placeholder='Tempel link YouTube (watch, youtu.be, shorts, live)'><button class='btn' style='width:100%' onclick='ytp()'>Tampilkan Video</button><p id='ye' class='sub' style='margin:10px 0 0;display:none;color:#ff6b7a'></p><div id='yw' style='margin-top:14px;display:none;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000'></div></div></div><p style='margin:0 0 10px'><b>Anime</b></p><div class='grid2' id='an'></div><p style='margin:22px 0 10px'><b>Video belajar</b></p><div class='grid2' id='vb'></div><p style='margin:22px 0 10px'><b>Musik fokus</b></p><div class='grid2' id='mf'></div></section>
 </main>
 <nav class="dock" id="dk"><span class="pill" id="pl"></span></nav>
 <div class="sheetbg" id="sb" onclick="cs()"></div>
@@ -532,6 +572,127 @@ go.addEventListener('click',()=>load(false));
 more.addEventListener('click',()=>load(true));
 clr.addEventListener('click',clearAll);
 inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();load(false)}});
+})();
+
+/* ===== YouTube Search (scoped; ytp()/ytId() lama tidak diubah) ===== */
+(function(){
+const g=id=>document.getElementById(id);
+const root=g('yt');if(!root)return;
+const T1=g('ytT1'),T2=g('ytT2'),S=g('ytS'),K=g('ytK'),inp=g('ytQ'),go=g('ytGo'),ch=g('ytCh'),ord=g('ytO');
+const ld=g('ytL'),er=g('ytE'),pn=g('ytP'),pw=g('ytW'),pt=g('ytPt'),pc=g('ytPc'),pm=g('ytPm'),pl=g('ytPl'),back=g('ytBack'),rs=g('ytR'),more=g('ytMore');
+if(!inp||!go||!rs)return;
+const API='/api/youtube-search',VID=/^[A-Za-z0-9_-]{11}$/;
+let ctl=null,busy=false,st={q:'',cat:'',ord:'relevance',tok:null},cat='',player=null,pid=0,apiP=null;
+function showErr(m){er.textContent=m;er.hidden=false}
+function setBusy(b){busy=b;go.disabled=b;go.textContent=b?'Mencari...':'Cari';ld.hidden=!b;more.disabled=b}
+function fmtDate(s){if(!s)return'';const d=new Date(s);if(isNaN(d))return'';try{return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}catch(e){return''}}
+/* ---- pemutar ---- */
+function stopPlayer(){pid++;if(player){try{player.destroy()}catch(e){}player=null}pw.textContent=''}
+function closePlayer(){stopPlayer();pn.hidden=true;pm.hidden=true;pm.textContent=''}
+function ensureApi(){
+ if(window.YT&&window.YT.Player)return Promise.resolve();
+ if(apiP)return apiP;
+ apiP=new Promise((res,rej)=>{
+  const prev=window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady=function(){if(typeof prev==='function'){try{prev()}catch(e){}}res()};
+  const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;
+  s.onerror=()=>{apiP=null;rej(new Error('load'))};document.head.appendChild(s);
+  setTimeout(()=>{if(!(window.YT&&window.YT.Player)){apiP=null;rej(new Error('timeout'))}},8000);
+ });
+ return apiP;
+}
+function playerErr(code,id){
+ pm.textContent=(code===101||code===150||code===152||code===153)?'Pemilik video tidak mengizinkan video ini diputar di website lain. Tonton langsung di YouTube lewat tautan di bawah.':code===100?'Video tidak ditemukan atau bersifat privat. Kamu bisa coba membukanya di YouTube.':'Video tidak bisa diputar di sini. Coba tonton langsung di YouTube lewat tautan di bawah.';
+ pm.hidden=false;
+}
+function iframeFallback(id){
+ const f=document.createElement('iframe');
+ f.src='https://www.youtube-nocookie.com/embed/'+id+'?rel=0&playsinline=1&autoplay=1';
+ f.title='Pemutar YouTube';f.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen');
+ f.setAttribute('allowfullscreen','');f.referrerPolicy='strict-origin-when-cross-origin';pw.textContent='';pw.appendChild(f);
+}
+async function play(it){
+ if(!VID.test(it.id))return;
+ stopPlayer();const my=pid;
+ pt.textContent=it.title;pc.textContent=it.channel;pl.href='https://www.youtube.com/watch?v='+it.id;
+ pm.hidden=true;pm.textContent='';pn.hidden=false;
+ pn.scrollIntoView({behavior:'smooth',block:'nearest'});
+ const host=document.createElement('div');pw.appendChild(host);
+ try{
+  await ensureApi();
+  if(my!==pid)return;
+  player=new window.YT.Player(host,{host:'https://www.youtube-nocookie.com',videoId:it.id,width:'100%',height:'100%',
+   playerVars:{rel:0,playsinline:1,autoplay:1},
+   events:{onError:e=>{if(my===pid)playerErr(e&&e.data,it.id)}}});
+ }catch(e){
+  if(my!==pid)return;
+  iframeFallback(it.id);
+ }
+}
+/* ---- hasil ---- */
+function card(it){
+ const b=document.createElement('button');b.type='button';b.className='ytv';b.setAttribute('aria-label','Putar: '+it.title);
+ const th=document.createElement('div');th.className='th';
+ if(it.thumb){const im=document.createElement('img');im.alt='';im.loading='lazy';im.decoding='async';im.referrerPolicy='no-referrer';im.src=it.thumb;im.addEventListener('error',()=>im.remove(),{once:true});th.appendChild(im)}
+ if(it.live){const l=document.createElement('span');l.className='lv';l.textContent='LIVE';th.appendChild(l)}
+ const bd=document.createElement('div');bd.className='bd';
+ const t=document.createElement('span');t.className='tt';t.textContent=it.title||'(Tanpa judul)';
+ const c=document.createElement('span');c.className='ch';
+ c.textContent=[it.channel,fmtDate(it.published)].filter(Boolean).join(' · ');
+ bd.append(t,c);b.append(th,bd);
+ b.addEventListener('click',()=>play(it));
+ return b;
+}
+async function load(append){
+ if(busy)return;
+ er.hidden=true;er.textContent='';
+ let q;
+ if(append)q=st.q;
+ else{
+  q=inp.value.replace(/\s+/g,' ').trim();
+  if(!q){showErr('Ketik kata kunci dulu (judul video, nama channel, atau kata bebas).');inp.focus();return}
+  if(q.length>100){showErr('Kata kunci terlalu panjang (maksimal 100 karakter).');return}
+  st={q,cat,ord:ord.value,tok:null};rs.textContent='';more.hidden=true;closePlayer();
+ }
+ if(ctl)ctl.abort();ctl=new AbortController();const my=ctl;
+ setBusy(true);
+ try{
+  const u=API+'?q='+encodeURIComponent(st.q)+(st.cat?'&category='+encodeURIComponent(st.cat):'')+'&order='+encodeURIComponent(st.ord)+(append&&st.tok?'&pageToken='+encodeURIComponent(st.tok):'');
+  const r=await fetch(u,{signal:my.signal,headers:{accept:'application/json'}});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(my!==ctl)return;
+  if(!j){showErr(r.status===404?'Backend belum aktif. Pastikan api/youtube-search.js ikut ter-deploy di Vercel.':'Server memberi respons yang tidak bisa dibaca. Coba lagi.');return}
+  if(!r.ok||!j.ok){showErr(j.error||'Pencarian gagal. Coba lagi.');return}
+  if(!append&&!j.items.length){const p=document.createElement('p');p.className='ytz';p.textContent='Tidak ada video untuk "'+st.q+'". Coba kata kunci atau kategori lain.';rs.appendChild(p);return}
+  const fr=document.createDocumentFragment();j.items.forEach(it=>fr.appendChild(card(it)));rs.appendChild(fr);
+  st.tok=j.nextPageToken||null;more.hidden=!st.tok;
+ }catch(e){
+  if(e&&e.name==='AbortError')return;
+  showErr(navigator.onLine===false?'Kamu sedang offline. Sambungkan internet lalu coba lagi.':'Tidak bisa menghubungi server. Coba lagi sebentar lagi.');
+ }finally{if(my===ctl)setBusy(false)}
+}
+/* ---- tab ---- */
+function setTab(n){
+ const one=n===1;
+ T1.classList.toggle('on',one);T2.classList.toggle('on',!one);
+ T1.setAttribute('aria-selected',one);T2.setAttribute('aria-selected',!one);
+ S.hidden=!one;K.hidden=one;
+ if(one){const w=g('yw');if(w){w.innerHTML='';w.style.display='none'}}else closePlayer();
+}
+T1.addEventListener('click',()=>setTab(1));
+T2.addEventListener('click',()=>setTab(2));
+/* ---- kontrol ---- */
+go.addEventListener('click',()=>load(false));
+more.addEventListener('click',()=>load(true));
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();load(false)}});
+ch.addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b)return;
+ ch.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));cat=b.dataset.c||'';
+ if(st.q||inp.value.trim())load(false)});
+ord.addEventListener('change',()=>{if(st.q||inp.value.trim())load(false)});
+back.addEventListener('click',()=>{closePlayer();rs.scrollIntoView({behavior:'smooth',block:'start'})});
+/* hentikan video saat pindah dari halaman Nonton */
+const p5=g('p5');
+if(p5&&window.MutationObserver)new MutationObserver(()=>{if(!p5.classList.contains('on'))closePlayer()}).observe(p5,{attributes:true,attributeFilter:['class']});
 })();
 </script>
 </body>
