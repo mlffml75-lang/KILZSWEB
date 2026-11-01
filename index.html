@@ -230,6 +230,17 @@ select{width:100%;font:500 15px Manrope,sans-serif;color:var(--tx);background:va
 #anime-root .anime-src{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 #anime-root .anime-src a{font:700 13px Manrope,sans-serif;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx);text-decoration:none}
 #anime-root .anime-no{margin:8px 0 0;color:var(--mute);font-size:13px;line-height:1.5}
+#anime-root .anime-yt{margin-top:2px}
+#anime-root .anime-rt{margin-top:8px;padding:10px 16px}
+#anime-root .anime-ypn{margin-top:10px}
+#anime-root .anime-ypt{display:block;margin-top:12px;word-break:break-word}
+#anime-root .anime-ypc{margin:4px 0 0;color:var(--mute);font-size:13px;word-break:break-word}
+#anime-root .anime-ynv{display:flex;gap:10px;margin:12px 0 8px}
+#anime-root .anime-ynv .btn{flex:1;padding:10px 12px}
+#anime-root .anime-ynv .btn:disabled{opacity:.45}
+#anime-root .anime-yeps{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px;margin-top:12px}
+#anime-root .anime-epb{font:700 13px Manrope,sans-serif;padding:11px 0;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer}
+#anime-root .anime-epb.on{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--a),var(--b))}
 @media(min-width:700px){#anime-root .anime-g{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}#anime-root .anime-fil{grid-template-columns:repeat(4,1fr)}#anime-root .anime-pst{flex-basis:160px}}
 </style>
 </head>
@@ -762,6 +773,8 @@ const ST={RELEASING:'Sedang tayang',FINISHED:'Tamat',NOT_YET_RELEASED:'Belum tay
 const FM={TV:'TV',TV_SHORT:'TV Short',MOVIE:'Film',SPECIAL:'Special',OVA:'OVA',ONA:'ONA',MUSIC:'Musik'};
 let st={q:'',genre:'',status:'',year:'',sort:'relevance',page:1,hasNext:false};
 let ctlL=null,ctlD=null,busyL=false,loaded=false,scrollY=0,trBtn=null,trBox=null,playing=false;
+let epCtl=null,epPlayer=null,epPid=0,epList=[],epCur=-1,epApiP=null,epUI=null;
+const EP_API='/api/anime-episodes';
 function h(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined&&txt!==null)e.textContent=txt;return e}
 function showErr(m){E.er.textContent=m;E.er.hidden=false}
 function clearErr(){E.er.hidden=true;E.er.textContent=''}
@@ -781,6 +794,7 @@ function stopPlayer(){
 function playTrailer(id){
  if(!VID.test(id)||!trBox)return;
  if(playing){stopPlayer();return}
+ stopEp();
  const f=document.createElement('iframe');
  f.src=EMBED+id+'?rel=0&playsinline=1&autoplay=1';
  f.title='Trailer anime';
@@ -789,6 +803,125 @@ function playTrailer(id){
  f.setAttribute('allowfullscreen','');f.referrerPolicy='strict-origin-when-cross-origin';
  trBox.textContent='';trBox.appendChild(f);trBox.hidden=false;playing=true;
  if(trBtn)trBtn.textContent='Tutup Trailer';
+}
+/* ---- episode resmi (YouTube IFrame Player; hanya video dari kanal resmi yang diverifikasi server) ---- */
+function stopEp(){
+ epPid++;
+ if(epPlayer){try{epPlayer.destroy()}catch(e){}epPlayer=null}
+ if(epUI){epUI.wrap.textContent='';epUI.panel.hidden=true;epUI.btns.forEach(b=>b.classList.remove('on'))}
+ epCur=-1;
+}
+function stopAll(){stopPlayer();stopEp();if(epCtl){epCtl.abort();epCtl=null}}
+function ytApi(){
+ if(window.YT&&window.YT.Player)return Promise.resolve();
+ if(epApiP)return epApiP;
+ epApiP=new Promise((res,rej)=>{
+  const prev=window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady=function(){if(typeof prev==='function'){try{prev()}catch(e){}}res()};
+  if(!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')){
+   const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;
+   s.onerror=()=>{epApiP=null;rej(new Error('load'))};document.head.appendChild(s);
+  }
+  setTimeout(()=>{if(!(window.YT&&window.YT.Player)){epApiP=null;rej(new Error('timeout'))}},8000);
+ });
+ return epApiP;
+}
+function epErrMsg(code){
+ if(code===101||code===150||code===152||code===153)return 'Pemilik video tidak mengizinkan video ini diputar di website lain. Tonton langsung di YouTube lewat tautan di bawah.';
+ if(code===100)return 'Video tidak ditemukan atau bersifat privat. Coba buka di YouTube.';
+ return 'Video tidak bisa diputar di sini. Coba tonton langsung di YouTube lewat tautan di bawah.';
+}
+function buildEpUI(){
+ const root=h('div','anime-yt');
+ const msg=h('p','anime-no','Mencari episode resmi di Muse Indonesia dan Ani-One Asia...');
+ const retry=h('button','btn ghost anime-rt','Coba lagi');retry.type='button';retry.hidden=true;
+ const panel=h('div','anime-ypn');panel.hidden=true;
+ const wrap=h('div','anime-pl anime-ypw');
+ const ttl=h('b','anime-ypt'),sub=h('p','anime-ypc');
+ const err=h('p','anime-e');err.hidden=true;err.setAttribute('role','alert');
+ const hint=h('p','anime-no');hint.hidden=true;
+ const nav=h('div','anime-ynv');
+ const prev=h('button','btn ghost','\u2190 Sebelumnya');prev.type='button';
+ const next=h('button','btn ghost','Berikutnya \u2192');next.type='button';
+ nav.append(prev,next);
+ const yl=link('https://www.youtube.com/','Tonton di YouTube \u2197','anime-lk');
+ panel.append(wrap,ttl,sub,err,hint,nav,yl);
+ const list=h('div','anime-yeps');list.hidden=true;
+ const foot=h('p','anime-no');foot.hidden=true;
+ root.append(msg,retry,panel,list,foot);
+ prev.addEventListener('click',()=>playEp(epCur-1));
+ next.addEventListener('click',()=>playEp(epCur+1));
+ return {root,msg,retry,panel,wrap,ttl,sub,err,hint,prev,next,yl,list,foot,btns:[]};
+}
+async function playEp(i){
+ const ui=epUI,e=epList[i];
+ if(!ui||!e||!VID.test(e.videoId))return;
+ stopPlayer();
+ epPid++;const my=epPid;
+ if(epPlayer){try{epPlayer.destroy()}catch(x){}epPlayer=null}
+ epCur=i;
+ ui.btns.forEach((b,k)=>b.classList.toggle('on',k===i));
+ ui.ttl.textContent='Episode '+e.n;
+ ui.sub.textContent=[e.title,(e.title||'').toLowerCase().includes((e.channel||'').toLowerCase())?'':e.channel].filter(Boolean).join(' \u00b7 ');
+ ui.yl.href='https://www.youtube.com/watch?v='+e.videoId;
+ ui.err.hidden=true;ui.err.textContent='';ui.hint.hidden=true;
+ ui.prev.disabled=i<=0;ui.next.disabled=i>=epList.length-1;
+ ui.panel.hidden=false;
+ ui.wrap.textContent='';const host=document.createElement('div');ui.wrap.appendChild(host);
+ ui.panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+ try{
+  await ytApi();
+  if(my!==epPid)return;
+  epPlayer=new window.YT.Player(host,{host:'https://www.youtube-nocookie.com',videoId:e.videoId,width:'100%',height:'100%',
+   playerVars:{rel:0,playsinline:1,autoplay:1},
+   events:{
+    onError:ev=>{if(my===epPid){ui.err.textContent=epErrMsg(ev&&ev.data);ui.err.hidden=false}},
+    onStateChange:ev=>{if(my===epPid&&ev&&ev.data===0){ui.hint.textContent=i<epList.length-1?'Episode selesai. Tekan "Berikutnya" untuk lanjut.':'Episode terakhir yang tersedia sudah selesai.';ui.hint.hidden=false}}
+   }});
+ }catch(x){
+  if(my!==epPid)return;
+  const f=document.createElement('iframe');
+  f.src=EMBED+e.videoId+'?rel=0&playsinline=1&autoplay=1';f.title='Episode '+e.n;
+  f.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen');
+  f.setAttribute('sandbox','allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox');
+  f.setAttribute('allowfullscreen','');f.referrerPolicy='strict-origin-when-cross-origin';
+  ui.wrap.textContent='';ui.wrap.appendChild(f);
+ }
+}
+function renderEps(ui,j){
+ epList=(j.episodes||[]).filter(e=>e&&Number.isInteger(e.n)&&VID.test(e.videoId));
+ ui.btns=[];ui.list.textContent='';
+ if(!epList.length){ui.msg.textContent='Episode resmi belum ditemukan.';return}
+ const chs=[...new Set(epList.map(e=>e.channel).filter(Boolean))].join(', ');
+ ui.msg.textContent=epList.length+' episode resmi ditemukan di '+chs+'. Pilih episode untuk memutar di sini.';
+ epList.forEach((e,i)=>{
+  const b=h('button','anime-epb',String(e.n));b.type='button';
+  b.title='Episode '+e.n+(e.title?' \u2014 '+e.title:'');b.setAttribute('aria-label','Putar episode '+e.n);
+  b.addEventListener('click',()=>playEp(i));
+  ui.btns.push(b);ui.list.appendChild(b);
+ });
+ ui.list.hidden=false;
+ ui.foot.textContent='Sumber: kanal YouTube resmi (identitas kanal diverifikasi server). Ketersediaan bergantung pada lisensi dan wilayah.';ui.foot.hidden=false;
+}
+async function loadEpisodes(id){
+ const ui=epUI;if(!ui)return;
+ if(epCtl)epCtl.abort();epCtl=new AbortController();const my=epCtl;
+ ui.retry.hidden=true;ui.msg.textContent='Mencari episode resmi di Muse Indonesia dan Ani-One Asia...';
+ const fail=m=>{ui.msg.textContent=m;ui.retry.hidden=false;ui.retry.onclick=()=>loadEpisodes(id)};
+ try{
+  const r=await fetch(EP_API+'?id='+id,{signal:my.signal,headers:{accept:'application/json'}});
+  let j=null;try{j=await r.json()}catch(e){}
+  if(my!==epCtl||ui!==epUI)return;
+  if(!j||!r.ok||!j.ok){fail(!j?(r.status===404?'Backend episode belum aktif. Pastikan api/anime-episodes.js ikut ter-deploy di Vercel.':'Server memberi respons yang tidak bisa dibaca. Coba lagi.'):(j.error||'Gagal mencari episode resmi.'));return}
+  if(!j.found||!Array.isArray(j.episodes)||!j.episodes.length){
+   ui.msg.textContent=j.reason==='not_yet_released'?'Anime ini belum tayang, jadi belum ada episode.':'Episode resmi belum ditemukan di Muse Indonesia atau Ani-One Asia. Anime ini mungkin tidak tersedia gratis di YouTube.';
+   return;
+  }
+  renderEps(ui,j);
+ }catch(e){
+  if(e&&e.name==='AbortError')return;
+  if(my===epCtl&&ui===epUI)fail(netMsg());
+ }
 }
 /* ---- katalog ---- */
 function card(it){
@@ -836,7 +969,7 @@ async function loadList(append){
 /* ---- detail ---- */
 function showCat(){
  if(ctlD){ctlD.abort();ctlD=null}
- stopPlayer();trBtn=null;trBox=null;
+ stopAll();trBtn=null;trBox=null;
  E.det.hidden=true;E.cat.hidden=false;E.body.textContent='';
  window.scrollTo(0,scrollY);
 }
@@ -844,7 +977,7 @@ function chipRow(items,cls){const d=h('div','anime-ch'+(cls?' '+cls:''));items.f
 function link(href,txt,cls){const a=h('a',cls,txt);a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a}
 function fmtAir(ts){try{return new Date(ts*1000).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}catch(e){return''}}
 function renderDetail(a){
- stopPlayer();trBtn=null;trBox=null;
+ stopAll();trBtn=null;trBox=null;
  const b=E.body;b.textContent='';
  const hd=h('div','anime-hd'),ps=h('div','anime-pst');
  if(a.cover){const im=document.createElement('img');im.alt='Poster '+a.title;im.referrerPolicy='no-referrer';im.src=a.cover;im.addEventListener('error',()=>im.remove(),{once:true});ps.appendChild(im)}
@@ -874,8 +1007,13 @@ function renderDetail(a){
   b.appendChild(row);
   trBox=h('div','anime-pl');trBox.hidden=true;b.appendChild(trBox);
  }else b.appendChild(h('p','anime-no','Trailer resmi belum tersedia di sumber data.'));
- /* episode & sumber */
- b.appendChild(h('b','anime-h','Episode & sumber tonton'));
+ /* episode resmi (YouTube) */
+ b.appendChild(h('b','anime-h','Episode resmi (YouTube)'));
+ epUI=buildEpUI();epList=[];epCur=-1;b.appendChild(epUI.root);
+ if(a.status==='NOT_YET_RELEASED')epUI.msg.textContent='Anime ini belum tayang, jadi belum ada episode.';
+ else loadEpisodes(a.id);
+ /* sumber lain dari AniList */
+ b.appendChild(h('b','anime-h','Sumber tonton resmi lainnya'));
  if(a.episodeLinks&&a.episodeLinks.length){
   const l=h('div','anime-eps');
   a.episodeLinks.forEach(e=>{
@@ -894,7 +1032,7 @@ function renderDetail(a){
 async function openDetail(id){
  if(!Number.isInteger(id)||id<1)return;
  scrollY=window.scrollY||0;
- stopPlayer();
+ stopAll();
  if(ctlD)ctlD.abort();ctlD=new AbortController();const my=ctlD;
  E.cat.hidden=true;E.det.hidden=false;E.body.textContent='';
  E.body.appendChild(h('p','anime-no','Memuat detail...'));
@@ -926,7 +1064,7 @@ const p5=g('p5');
 function sync(){
  if(!p5)return;
  if(p5.classList.contains('on')){if(!loaded){loaded=true;loadList(false)}}
- else stopPlayer();
+ else stopAll();
 }
 if(p5&&window.MutationObserver)new MutationObserver(sync).observe(p5,{attributes:true,attributeFilter:['class']});
 sync();

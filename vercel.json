@@ -1,5 +1,6 @@
 {
   "functions": {
-    "api/tiktok.js": { "maxDuration": 30 }
+    "api/tiktok.js": { "maxDuration": 30 },
+    "api/anime-episodes.js": { "maxDuration": 20 }
   }
 }
