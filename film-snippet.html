@@ -1,0 +1,385 @@
+<!-- ============ SNIPPET NONTON FILM & SERIES (untuk merge manual jika index.html kamu berbeda) ============
+  1. HTML: di <section id='p5'><h2>Nonton</h2>, tempel BLOK 1 tepat SETELAH <h2>Nonton</h2> (sebelum card anime).
+  2. CSS : tempel BLOK 2 tepat SEBELUM </style>.
+  3. JS  : tempel BLOK 3 tepat SEBELUM </script> yang paling bawah.
+Backend: salin api/film.js ke folder api/. Env Vercel: TMDB_API_KEY.
+Tidak ada fungsi/variabel global baru; semua ID & class berawalan "film".
+=================================================================================================== -->
+
+<!-- ========== BLOK 1 (HTML) ========== -->
+<div class='show film-jump' id='film-jump' role='navigation' aria-label='Lompat ke bagian'><button type='button' data-go='film-root'>Film &amp; Series</button><button type='button' data-go='anime-root'>Anime</button><button type='button' data-go='sp'>Spotify</button><button type='button' data-go='tk'>TikTok</button><button type='button' data-go='yt'>YouTube</button></div><div class='card show' id='film-root'><div id='film-main'><b style='font:800 18px Unbounded,sans-serif'>Nonton Film &amp; Series</b><p class='sub' style='margin:8px 0 12px'>Jelajahi film dan series, lihat detailnya, lalu cari tempat menonton resmi.</p><div class='film-f'><input id='film-q' type='search' enterkeyhint='search' maxlength='100' autocomplete='off' autocapitalize='off' spellcheck='false' placeholder='Cari judul film atau series' aria-label='Cari judul film atau series'><button class='film-b' id='film-go' type='button'>Cari</button></div><div class='film-tabs' id='film-tabs' role='tablist'><button type='button' class='on' data-t='home' role='tab' aria-selected='true'>Beranda</button><button type='button' data-t='movie' role='tab' aria-selected='false'>Film</button><button type='button' data-t='tv' role='tab' aria-selected='false'>Series</button></div><div class='film-chips' id='film-chips' role='group' aria-label='Kategori' hidden></div><div class='film-fil' id='film-fil' hidden><input id='film-year' type='number' inputmode='numeric' min='1900' max='2100' placeholder='Tahun rilis' aria-label='Tahun rilis'><select id='film-sort' aria-label='Urutkan'><option value='popularity'>Populer</option><option value='rating'>Rating tertinggi</option><option value='newest'>Terbaru</option></select></div><div id='film-load' class='film-l' hidden><i></i><span>Memuat...</span></div><div id='film-errbox' hidden><p id='film-err' class='film-e' role='alert'></p><button class='btn ghost film-rt' id='film-rt' type='button'>Coba lagi</button></div><div id='film-home'></div><p class='film-sub' id='film-sub' hidden></p><div class='film-g' id='film-grid' hidden></div><button class='btn ghost' id='film-more' type='button' hidden>Muat lebih banyak</button></div><div id='film-det' hidden><button class='btn ghost' id='film-back' type='button'>&#8592; Kembali</button><div id='film-body'></div></div><p class='film-n'>Data film &amp; series dari TMDB. Produk ini menggunakan TMDB API tetapi tidak didukung atau disertifikasi oleh TMDB. Data tempat menonton oleh JustWatch. KilzsWeb tidak menyediakan maupun menautkan film bajakan.</p></div>
+
+<!-- ========== BLOK 2 (CSS) ========== -->
+<style>
+/* Nonton Film & Series (scoped ke #film-root dan .film-jump) */
+.film-jump{display:flex;gap:8px;overflow-x:auto;margin:0 0 14px;padding:2px;scrollbar-width:none}
+.film-jump::-webkit-scrollbar{display:none}
+.film-jump button{flex:0 0 auto;font:700 13px Manrope,sans-serif;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+.film-jump button:first-child{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--a),var(--b))}
+.film-jump button:active{transform:scale(.94)}
+#film-root{margin-bottom:18px}
+#film-root [hidden]{display:none!important}
+#film-root .film-f{display:flex;gap:10px;align-items:flex-start}
+#film-root .film-f input{margin:0;flex:1;min-width:0}
+#film-root .film-b{flex:0 0 auto;font:700 14px Manrope,sans-serif;border:0;border-radius:16px;padding:14px 20px;color:#fff;background:linear-gradient(135deg,var(--a),var(--b));cursor:pointer;transition:transform .2s cubic-bezier(.3,1.5,.5,1)}
+#film-root .film-b:active{transform:scale(.94)}
+#film-root .film-b:disabled{opacity:.6;cursor:default}
+#film-root .film-tabs{display:flex;gap:6px;margin-top:12px;padding:4px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+#film-root .film-tabs button{flex:1;font:700 13px Manrope,sans-serif;border:0;border-radius:12px;padding:10px 6px;color:var(--mute);background:transparent;cursor:pointer}
+#film-root .film-tabs button.on{color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+#film-root .film-chips{display:flex;gap:8px;overflow-x:auto;margin:12px -2px 0;padding:2px;scrollbar-width:none}
+#film-root .film-chips::-webkit-scrollbar{display:none}
+#film-root .film-chips button{flex:0 0 auto;font:700 13px Manrope,sans-serif;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer}
+#film-root .film-chips button.on{border-color:transparent;color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+#film-root .film-fil{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+#film-root .film-fil input,#film-root .film-fil select{margin:0;width:100%;min-width:0;padding:11px 12px;border-radius:14px;font-size:13px}
+#film-root .film-l{display:flex;align-items:center;gap:10px;margin-top:14px;color:var(--mute);font-weight:700}
+#film-root .film-l i{width:18px;height:18px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--a);animation:filmspin .8s linear infinite}
+@keyframes filmspin{to{transform:rotate(360deg)}}
+#film-root .film-e{margin:12px 0 0;color:#ff6b7a;font-weight:700;word-break:break-word}
+#film-root .film-rt{margin-top:8px;padding:10px 16px}
+#film-root .film-sec{margin-top:18px}
+#film-root .film-h{display:block;font:800 15px Unbounded,sans-serif;margin-bottom:10px}
+#film-root .film-row{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px 2px 12px;margin:0 -2px;scrollbar-width:none}
+#film-root .film-row::-webkit-scrollbar{display:none}
+#film-root .film-row .film-c{flex:0 0 118px;scroll-snap-align:start}
+#film-root .film-sub{margin:14px 0 0;color:var(--mute);font-size:13px;word-break:break-word}
+#film-root .film-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;margin-top:14px}
+#film-root .film-c{display:block;width:100%;min-width:0;text-align:left;padding:0;border:0;background:transparent;color:var(--tx);cursor:pointer;font:inherit;animation:filmin .35s ease both}
+@keyframes filmin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#film-root .film-p{position:relative;display:block;aspect-ratio:2/3;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--a),var(--b));border:1px solid var(--line);transition:transform .25s cubic-bezier(.3,1.4,.5,1),box-shadow .25s}
+#film-root .film-p img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+#film-root .film-p .film-nt{position:absolute;inset:0;display:grid;place-items:center;padding:10px;text-align:center;font:700 12px Manrope,sans-serif;color:#fff;word-break:break-word}
+#film-root .film-rg{position:absolute;right:6px;top:6px;font:800 10px Manrope,sans-serif;color:#fff;background:rgba(0,0,0,.72);border-radius:8px;padding:3px 7px}
+#film-root .film-ty{position:absolute;left:6px;bottom:6px;font:800 10px Manrope,sans-serif;color:#fff;background:rgba(0,0,0,.72);border-radius:8px;padding:3px 7px}
+#film-root .film-c:active .film-p{transform:scale(.96)}
+@media (hover:hover){#film-root .film-c:hover .film-p{transform:translateY(-5px);box-shadow:0 14px 28px rgba(0,0,0,.45)}#film-root .film-c:hover .film-p img{transform:scale(1.06)}}
+#film-root .film-t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:8px;font-weight:700;font-size:13px;line-height:1.3;word-break:break-word}
+#film-root .film-m{display:block;margin-top:3px;color:var(--mute);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#film-root #film-more{width:100%;margin-top:14px}
+#film-root .film-z{grid-column:1/-1;color:var(--mute);text-align:center;margin:0;padding:12px 0}
+#film-root .film-n{color:var(--mute);font-size:11px;line-height:1.5;margin:16px 0 0}
+#film-root #film-body{margin-top:14px}
+#film-root .film-bd{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:16/9;background:linear-gradient(135deg,var(--a),var(--b));margin-bottom:-46px}
+#film-root .film-bd img{width:100%;height:100%;object-fit:cover;display:block;opacity:.55}
+#film-root .film-hd{position:relative;display:flex;gap:14px;align-items:flex-end;padding:0 4px}
+#film-root .film-pst{flex:0 0 110px;aspect-ratio:2/3;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,var(--a),var(--b));border:1px solid var(--line);box-shadow:0 10px 24px rgba(0,0,0,.45)}
+#film-root .film-pst img{width:100%;height:100%;object-fit:cover;display:block}
+#film-root .film-inf{flex:1;min-width:0}
+#film-root .film-tt{display:block;font:800 17px Unbounded,sans-serif;line-height:1.25;word-break:break-word}
+#film-root .film-tg{margin:6px 0 0;color:var(--mute);font-size:12px;font-style:italic;word-break:break-word}
+#film-root .film-ch{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+#film-root .film-ch span{font:700 11px Manrope,sans-serif;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx)}
+#film-root .film-ch.gn span{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--a),var(--b))}
+#film-root .film-hh{display:block;margin:18px 0 8px}
+#film-root .film-sy{margin:0;white-space:pre-line;line-height:1.55;word-break:break-word}
+#film-root .film-cr{margin:6px 0 0;color:var(--mute);font-size:13px;line-height:1.5;word-break:break-word}
+#film-root .film-no{margin:8px 0 0;color:var(--mute);font-size:13px;line-height:1.5}
+#film-root .film-tr{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#film-root .film-tr .btn{padding:10px 16px}
+#film-root .film-lk{color:var(--a);font-weight:700;text-decoration:none;font-size:13px}
+#film-root .film-pl{aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;margin-top:10px}
+#film-root .film-pl iframe{width:100%;height:100%;border:0;display:block}
+#film-root .film-wg{margin-top:10px}
+#film-root .film-wg small{display:block;color:var(--mute);font-size:11px;margin-bottom:6px}
+#film-root .film-pv{display:flex;flex-wrap:wrap;gap:8px}
+#film-root .film-pv span{display:flex;align-items:center;gap:8px;font:700 12px Manrope,sans-serif;padding:6px 12px 6px 6px;border-radius:999px;border:1px solid var(--line);background:var(--card)}
+#film-root .film-pv img{width:26px;height:26px;border-radius:8px;object-fit:cover;display:block}
+#film-root .film-go{display:inline-block;margin-top:14px;text-align:center;text-decoration:none;padding:13px 20px;border-radius:16px;font:700 14px Manrope,sans-serif;color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+#film-root .film-ss{display:grid;gap:8px;margin-top:8px}
+#film-root .film-sb{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer;font:700 13px Manrope,sans-serif}
+#film-root .film-sb small{margin-left:auto;color:var(--mute);font-weight:600}
+#film-root .film-sb[aria-expanded=true]{border-color:var(--a)}
+#film-root .film-ep{display:grid;gap:8px;margin:8px 0 4px}
+#film-root .film-er{display:flex;gap:10px;padding:8px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+#film-root .film-er img{flex:0 0 84px;width:84px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;background:linear-gradient(135deg,var(--a),var(--b))}
+#film-root .film-er b{display:block;font-size:13px;word-break:break-word}
+#film-root .film-er small{display:block;color:var(--mute);font-size:11px;margin-top:2px}
+#film-root .film-er p{margin:4px 0 0;color:var(--mute);font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(min-width:700px){#film-root .film-g{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}#film-root .film-row .film-c{flex-basis:140px}#film-root .film-pst{flex-basis:170px}#film-root .film-fil{grid-template-columns:200px 220px}}
+</style>
+
+<!-- ========== BLOK 3 (JS) ========== -->
+<script>
+/* ===== Nonton Film & Series (scoped, tanpa global; fitur lain tidak diubah) ===== */
+(function(){
+const g=id=>document.getElementById(id);
+const root=g('film-root');if(!root)return;
+const E={q:g('film-q'),go:g('film-go'),tabs:g('film-tabs'),chips:g('film-chips'),fil:g('film-fil'),year:g('film-year'),sort:g('film-sort'),ld:g('film-load'),
+ eb:g('film-errbox'),er:g('film-err'),rt:g('film-rt'),home:g('film-home'),sub:g('film-sub'),grid:g('film-grid'),more:g('film-more'),
+ main:g('film-main'),det:g('film-det'),back:g('film-back'),body:g('film-body')};
+if(!E.q||!E.tabs||!E.grid||!E.body)return;
+const API='/api/film',EMBED='https://www.youtube-nocookie.com/embed/',KEY=/^[A-Za-z0-9_-]{11}$/;
+let S={tab:'home',q:'',genre:'',year:'',sort:'popularity',page:1,hasNext:false};
+let meta=null,metaP=null,ctl=null,ctlD=null,ctlS=null,started=false,scrollY=0,trBox=null,trBtn=null,playing=false,retryFn=null;
+function h(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined&&txt!==null)e.textContent=txt;return e}
+function link(href,txt,cls){const a=h('a',cls,txt);a.href=href;a.target='_blank';a.rel='noopener noreferrer';return a}
+function showErr(m,fn){E.er.textContent=m;E.eb.hidden=false;retryFn=fn||null;E.rt.hidden=!fn}
+function clearErr(){E.eb.hidden=true;E.er.textContent='';retryFn=null}
+function setBusy(b,msg){E.ld.hidden=!b;if(msg)E.ld.querySelector('span').textContent=msg;E.go.disabled=b;E.more.disabled=b}
+function netMsg(){return navigator.onLine===false?'Kamu sedang offline. Sambungkan internet lalu coba lagi.':'Tidak bisa menghubungi server. Coba lagi sebentar lagi.'}
+async function getJson(url,signal){
+ const r=await fetch(url,{signal,headers:{accept:'application/json'}});
+ let j=null;try{j=await r.json()}catch(e){}
+ if(!j)throw {user:r.status===404?'Backend film belum aktif. Pastikan api/film.js ikut ter-deploy di Vercel.':'Server memberi respons yang tidak bisa dibaca. Coba lagi.'};
+ if(!r.ok||!j.ok)throw {user:j.error||'Gagal memuat data. Coba lagi.'};
+ return j;
+}
+function errOf(e){return e&&e.user?e.user:netMsg()}
+function fmtDate(s){if(!s)return'';const d=new Date(s+'T00:00:00');if(isNaN(d))return'';try{return d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}catch(e){return''}}
+function fmtRun(m){if(!m)return'';const j=Math.floor(m/60),mm=m%60;return j?j+'j '+(mm?mm+'m':''):mm+'m'}
+function fmtN(n){try{return new Intl.NumberFormat('id-ID',{notation:'compact',maximumFractionDigits:1}).format(n)}catch(e){return String(n)}}
+/* ---- trailer ---- */
+function stopTrailer(){playing=false;if(trBox){trBox.textContent='';trBox.hidden=true}if(trBtn)trBtn.textContent='Putar Trailer'}
+function playTrailer(key){
+ if(!KEY.test(key)||!trBox)return;
+ if(playing){stopTrailer();return}
+ const f=document.createElement('iframe');
+ f.src=EMBED+key+'?rel=0&playsinline=1&autoplay=1';f.title='Trailer';
+ f.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen');
+ f.setAttribute('sandbox','allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox');
+ f.setAttribute('allowfullscreen','');f.referrerPolicy='strict-origin-when-cross-origin';
+ trBox.textContent='';trBox.appendChild(f);trBox.hidden=false;playing=true;if(trBtn)trBtn.textContent='Tutup Trailer';
+}
+/* ---- kartu poster ---- */
+function card(it,showType){
+ const b=h('button','film-c');b.type='button';b.setAttribute('aria-label',it.title+(it.year?' ('+it.year+')':''));
+ const p=h('span','film-p');
+ if(it.poster){const im=document.createElement('img');im.alt='';im.loading='lazy';im.decoding='async';im.referrerPolicy='no-referrer';im.src=it.poster;
+  im.addEventListener('error',()=>{im.remove();p.insertBefore(h('span','film-nt',it.title),p.firstChild)},{once:true});p.appendChild(im)}
+ else p.appendChild(h('span','film-nt',it.title));
+ if(typeof it.rating==='number')p.appendChild(h('span','film-rg','\u2605 '+it.rating.toFixed(1)));
+ if(showType)p.appendChild(h('span','film-ty',it.type==='tv'?'Series':'Film'));
+ b.append(p,h('span','film-t',it.title));
+ const m=[it.year,(it.genres||[]).slice(0,2).join(', ')].filter(Boolean).join(' \u00b7 ');
+ if(m)b.appendChild(h('span','film-m',m));
+ b.addEventListener('click',()=>openDetail(it.type,it.id));
+ return b;
+}
+/* ---- meta, tab, chip ---- */
+function ensureMeta(){
+ if(meta)return Promise.resolve(meta);
+ if(!metaP)metaP=getJson(API+'?action=meta').then(j=>{meta=j;return j}).catch(e=>{metaP=null;throw e});
+ return metaP;
+}
+function renderTabs(){
+ E.tabs.querySelectorAll('button').forEach(b=>{const on=b.dataset.t===S.tab;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});
+ E.fil.hidden=S.tab==='home';E.sort.disabled=!!S.q;
+}
+function renderChips(){
+ E.chips.textContent='';
+ if(!meta){E.chips.hidden=true;return}
+ const home=S.tab==='home',list=meta.genres[home?'movie':S.tab]||[];
+ if(!home){const all=h('button',S.genre===''?'on':'','Semua');all.type='button';all.addEventListener('click',()=>pickGenre('',null));E.chips.appendChild(all)}
+ list.forEach(x=>{const b=h('button',!home&&String(x.id)===S.genre?'on':'',x.name);b.type='button';b.addEventListener('click',()=>pickGenre(String(x.id),home));E.chips.appendChild(b)});
+ E.chips.hidden=false;
+}
+function readQ(){return E.q.value.replace(/\s+/g,' ').trim().slice(0,100)}
+function pickGenre(id,fromHome){
+ if(fromHome)S.tab='movie';
+ S.genre=id;S.q=readQ();
+ renderTabs();renderChips();apply();
+}
+function setTab(t){
+ /* menekan tab yang sedang aktif = menyetel ulang tampilan tab itu */
+ S.tab=t;S.genre='';S.q=readQ();if(t==='home'){S.year='';E.year.value=''}
+ renderTabs();renderChips();apply();
+}
+/* ---- Beranda ---- */
+async function loadHome(){
+ if(ctl)ctl.abort();ctl=new AbortController();const my=ctl;
+ clearErr();E.grid.hidden=true;E.sub.hidden=true;E.more.hidden=true;E.home.hidden=false;
+ setBusy(true,'Memuat film & series...');
+ try{
+  const j=await getJson(API+'?action=home',my.signal);
+  if(my!==ctl)return;
+  E.home.textContent='';
+  j.rows.forEach(r=>{
+   const sec=h('section','film-sec');sec.appendChild(h('b','film-h',r.title));
+   const row=h('div','film-row');r.items.forEach(it=>row.appendChild(card(it,r.key==='trending')));sec.appendChild(row);E.home.appendChild(sec);
+  });
+ }catch(e){if(e&&e.name==='AbortError')return;showErr(errOf(e),loadHome)}
+ finally{if(my===ctl)setBusy(false)}
+}
+/* ---- katalog / pencarian ---- */
+async function loadList(append){
+ if(append&&!S.hasNext)return;
+ clearErr();
+ if(!append){
+  if(ctl)ctl.abort();
+  S.page=1;S.hasNext=false;E.grid.textContent='';E.more.hidden=true;E.home.hidden=true;E.grid.hidden=false;
+ }
+ ctl=new AbortController();const my=ctl;
+ const type=S.tab==='home'?'all':S.tab,page=append?S.page+1:1;
+ const p=new URLSearchParams({action:'list',type,page:String(page)});
+ if(S.q)p.set('q',S.q);else p.set('sort',S.sort);
+ if(type!=='all'&&S.genre)p.set('genre',S.genre);
+ if(S.year)p.set('year',S.year);
+ E.sub.hidden=!S.q;
+ if(S.q)E.sub.textContent='Hasil untuk "'+S.q+'"'+(type==='movie'?' di Film':type==='tv'?' di Series':' (Film & Series)')+(S.genre?' \u00b7 genre dipakai untuk menyaring halaman ini':'');
+ setBusy(true,S.q?'Mencari...':'Memuat...');
+ try{
+  const j=await getJson(API+'?'+p.toString(),my.signal);
+  if(my!==ctl)return;
+  if(!append&&!j.items.length){E.grid.appendChild(h('p','film-z','Tidak ada hasil. Coba judul, genre, atau tahun lain.'));S.hasNext=!!j.hasNext;E.more.hidden=!S.hasNext;return}
+  const fr=document.createDocumentFragment();j.items.forEach(it=>fr.appendChild(card(it,type==='all')));E.grid.appendChild(fr);
+  S.page=j.page||page;S.hasNext=!!j.hasNext;E.more.hidden=!S.hasNext;
+  if(!j.items.length&&S.hasNext&&S.q&&S.genre)E.grid.appendChild(h('p','film-z','Tidak ada yang cocok di halaman ini. Tekan "Muat lebih banyak".'));
+ }catch(e){if(e&&e.name==='AbortError')return;showErr(errOf(e),()=>loadList(append))}
+ finally{if(my===ctl)setBusy(false)}
+}
+function apply(){if(S.tab==='home'&&!S.q)loadHome();else loadList(false)}
+function doSearch(){
+ const q=E.q.value.replace(/\s+/g,' ').trim();
+ if(q.length>100){showErr('Kata kunci terlalu panjang (maksimal 100 karakter).');return}
+ const y=E.year.value.trim(),mx=new Date().getFullYear()+2;
+ if(S.tab!=='home'&&y&&(!/^\d{4}$/.test(y)||+y<1900||+y>mx)){showErr('Tahun harus 4 digit antara 1900 dan '+mx+'.');return}
+ S.q=q;S.year=S.tab==='home'?'':y;S.sort=E.sort.value;
+ renderTabs();apply();
+}
+/* ---- detail ---- */
+function showMain(){
+ if(ctlD){ctlD.abort();ctlD=null}if(ctlS){ctlS.abort();ctlS=null}
+ stopTrailer();trBox=null;trBtn=null;
+ E.det.hidden=true;E.main.hidden=false;E.body.textContent='';
+ window.scrollTo(0,scrollY);
+}
+function chipRow(items,cls){const d=h('div','film-ch'+(cls?' '+cls:''));items.forEach(t=>d.appendChild(h('span',null,t)));return d}
+function provGroup(label,arr){
+ if(!arr||!arr.length)return null;
+ const w=h('div','film-wg');w.appendChild(h('small',null,label));
+ const pv=h('div','film-pv');
+ arr.forEach(p=>{const s=h('span');if(p.logo){const im=document.createElement('img');im.alt='';im.loading='lazy';im.referrerPolicy='no-referrer';im.src=p.logo;im.addEventListener('error',()=>im.remove(),{once:true});s.appendChild(im)}s.appendChild(document.createTextNode(p.name));pv.appendChild(s)});
+ w.appendChild(pv);return w;
+}
+function renderSeasons(it,box){
+ const list=h('div','film-ss');
+ it.seasons.forEach(s=>{
+  const wrap=h('div');
+  const b=h('button','film-sb',s.name);b.type='button';b.setAttribute('aria-expanded','false');
+  b.appendChild(h('small',null,s.episodes+' episode'+(s.airDate?' \u00b7 '+s.airDate.slice(0,4):'')));
+  const ep=h('div','film-ep');ep.hidden=true;let loaded=false;
+  b.addEventListener('click',async()=>{
+   const open=b.getAttribute('aria-expanded')==='true';
+   if(open){b.setAttribute('aria-expanded','false');ep.hidden=true;return}
+   b.setAttribute('aria-expanded','true');ep.hidden=false;
+   if(loaded)return;
+   ep.textContent='';ep.appendChild(h('p','film-no','Memuat episode...'));
+   if(ctlS)ctlS.abort();ctlS=new AbortController();const my=ctlS;
+   try{
+    const j=await getJson(API+'?action=season&id='+it.id+'&season='+s.number,my.signal);
+    if(my!==ctlS)return;
+    ep.textContent='';
+    if(!j.season.episodes.length){ep.appendChild(h('p','film-no','Daftar episode season ini belum tersedia di sumber data.'));loaded=true;return}
+    j.season.episodes.forEach(e=>{
+     const r=h('div','film-er');
+     if(e.still){const im=document.createElement('img');im.alt='';im.loading='lazy';im.referrerPolicy='no-referrer';im.src=e.still;im.addEventListener('error',()=>im.remove(),{once:true});r.appendChild(im)}
+     const t=h('div');t.appendChild(h('b',null,e.number+'. '+e.name));
+     const m=[fmtDate(e.airDate),e.runtime?e.runtime+' mnt':'',typeof e.rating==='number'?'\u2605 '+e.rating.toFixed(1):''].filter(Boolean).join(' \u00b7 ');
+     if(m)t.appendChild(h('small',null,m));if(e.overview)t.appendChild(h('p',null,e.overview));
+     r.appendChild(t);ep.appendChild(r);
+    });
+    loaded=true;
+   }catch(err){
+    if(err&&err.name==='AbortError')return;
+    ep.textContent='';ep.appendChild(h('p','film-e',errOf(err)));b.setAttribute('aria-expanded','false');
+   }
+  });
+  wrap.append(b,ep);list.appendChild(wrap);
+ });
+ box.appendChild(list);
+}
+function renderDetail(it){
+ stopTrailer();trBox=null;trBtn=null;
+ const b=E.body;b.textContent='';
+ if(it.backdrop){const bd=h('div','film-bd');const im=document.createElement('img');im.alt='';im.referrerPolicy='no-referrer';im.src=it.backdrop;im.addEventListener('error',()=>bd.remove(),{once:true});bd.appendChild(im);b.appendChild(bd)}
+ const hd=h('div','film-hd'),ps=h('div','film-pst');
+ if(it.poster){const im=document.createElement('img');im.alt='Poster '+it.title;im.referrerPolicy='no-referrer';im.src=it.poster;im.addEventListener('error',()=>im.remove(),{once:true});ps.appendChild(im)}
+ const inf=h('div','film-inf');inf.appendChild(h('b','film-tt',it.title));
+ if(it.tagline)inf.appendChild(h('p','film-tg',it.tagline));
+ const meta=[];
+ if(it.year)meta.push(String(it.year));
+ meta.push(it.type==='tv'?'Series':'Film');
+ if(it.runtime)meta.push(fmtRun(it.runtime)+(it.type==='tv'?'/eps':''));
+ if(typeof it.rating==='number')meta.push('\u2605 '+it.rating.toFixed(1)+(it.votes?' ('+fmtN(it.votes)+')':''));
+ if(it.status)meta.push(it.status);
+ if(it.type==='tv'&&it.numberOfSeasons)meta.push(it.numberOfSeasons+' season'+(it.numberOfEpisodes?' \u00b7 '+it.numberOfEpisodes+' eps':''));
+ inf.appendChild(chipRow(meta));
+ hd.append(ps,inf);b.appendChild(hd);
+ if(it.genres&&it.genres.length)b.appendChild(chipRow(it.genres,'gn'));
+ b.appendChild(h('b','film-hh','Sinopsis'));
+ b.appendChild(h('p','film-sy',it.overview||'Sinopsis belum tersedia di sumber data.'));
+ const cr=[];
+ if(it.directors&&it.directors.length)cr.push('Sutradara: '+it.directors.join(', '));
+ if(it.creators&&it.creators.length)cr.push('Dibuat oleh: '+it.creators.join(', '));
+ if(it.cast&&it.cast.length)cr.push('Pemeran: '+it.cast.join(', '));
+ if(it.networks&&it.networks.length)cr.push('Jaringan: '+it.networks.join(', '));
+ if(it.date)cr.push((it.type==='tv'?'Tayang perdana: ':'Rilis: ')+fmtDate(it.date));
+ if(it.nextEpisode&&it.nextEpisode.airDate)cr.push('Episode berikutnya (S'+(it.nextEpisode.season||'?')+' E'+it.nextEpisode.episode+'): '+fmtDate(it.nextEpisode.airDate));
+ cr.forEach(t=>b.appendChild(h('p','film-cr',t)));
+ /* trailer */
+ b.appendChild(h('b','film-hh','Trailer'));
+ if(it.trailerKey&&KEY.test(it.trailerKey)){
+  const row=h('div','film-tr');trBtn=h('button','btn','Putar Trailer');trBtn.type='button';
+  trBtn.addEventListener('click',()=>playTrailer(it.trailerKey));
+  row.append(trBtn,link('https://www.youtube.com/watch?v='+it.trailerKey,'Buka di YouTube','film-lk'));b.appendChild(row);
+  trBox=h('div','film-pl');trBox.hidden=true;b.appendChild(trBox);
+ }else b.appendChild(h('p','film-no','Trailer resmi belum tersedia di sumber data.'));
+ /* tempat menonton */
+ b.appendChild(h('b','film-hh','Tonton di platform resmi'));
+ const w=it.watch||{};
+ if(w.available){
+  b.appendChild(h('p','film-no','Ketersediaan di Indonesia (data JustWatch via TMDB). Ketersediaan bisa berubah.'));
+  [provGroup('Streaming',w.stream),provGroup('Gratis / dengan iklan',w.free),provGroup('Sewa',w.rent),provGroup('Beli',w.buy)].forEach(x=>{if(x)b.appendChild(x)});
+  b.appendChild(link(w.link,'Lihat tempat menonton \u2197','film-go'));
+ }else{
+  b.appendChild(h('p','film-no','Belum ada data platform streaming resmi untuk Indonesia. Kamu bisa cek halaman judul ini di TMDB untuk melihat informasi terbaru.'));
+  b.appendChild(link(w.link||it.tmdbUrl,'Lihat di TMDB \u2197','film-go'));
+ }
+ if(it.homepage){const p=h('p','film-no');p.appendChild(link(it.homepage,'Situs resmi \u2197','film-lk'));b.appendChild(p)}
+ /* series: season */
+ if(it.type==='tv'){
+  b.appendChild(h('b','film-hh','Season & episode'));
+  if(it.seasons&&it.seasons.length){b.appendChild(h('p','film-no','Informasi episode saja. Pemutaran lewat platform resmi di atas.'));renderSeasons(it,b)}
+  else b.appendChild(h('p','film-no','Daftar season belum tersedia di sumber data.'));
+ }
+}
+async function openDetail(type,id){
+ if(!Number.isInteger(id)||id<1||(type!=='movie'&&type!=='tv'))return;
+ scrollY=window.scrollY||0;stopTrailer();
+ if(ctlD)ctlD.abort();ctlD=new AbortController();const my=ctlD;
+ E.main.hidden=true;E.det.hidden=false;E.body.textContent='';E.body.appendChild(h('p','film-no','Memuat detail...'));
+ root.scrollIntoView({block:'start'});
+ try{
+  const j=await getJson(API+'?action=detail&type='+type+'&id='+id,my.signal);
+  if(my!==ctlD)return;
+  renderDetail(j.item);
+ }catch(e){
+  if(e&&e.name==='AbortError')return;
+  E.body.textContent='';const p=h('p','film-e',errOf(e));p.setAttribute('role','alert');E.body.appendChild(p);
+ }
+}
+/* ---- kontrol ---- */
+E.go.addEventListener('click',doSearch);
+E.q.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSearch()}});
+E.year.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doSearch()}});
+E.year.addEventListener('change',()=>{if(E.year.value.trim()!==S.year)doSearch()});
+E.sort.addEventListener('change',()=>{if(E.sort.value!==S.sort)doSearch()});
+E.tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-t]');if(b)setTab(b.dataset.t)});
+E.more.addEventListener('click',()=>loadList(true));
+E.back.addEventListener('click',showMain);
+E.rt.addEventListener('click',()=>{if(retryFn){const f=retryFn;clearErr();f()}});
+const jump=g('film-jump');
+if(jump)jump.addEventListener('click',e=>{const b=e.target.closest('button[data-go]');if(!b)return;const t=g(b.dataset.go);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})});
+/* muat saat halaman Nonton pertama kali dibuka; hentikan trailer saat pindah halaman */
+const p5=g('p5');
+function sync(){
+ if(!p5)return;
+ if(p5.classList.contains('on')){
+  if(!started){started=true;renderTabs();ensureMeta().then(renderChips).catch(()=>{});loadHome()}
+ }else stopTrailer();
+}
+if(p5&&window.MutationObserver)new MutationObserver(sync).observe(p5,{attributes:true,attributeFilter:['class']});
+sync();
+})();
+</script>
