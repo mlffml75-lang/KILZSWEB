@@ -1,0 +1,63 @@
+<!-- ============ SNIPPET NAVIGASI BAWAH "LIQUID GLASS" (merge manual jika index.html kamu berbeda) ============
+
+Ada 4 perubahan kecil. Cari teks LAMA lalu ganti dengan teks BARU di bawah.
+
+[1] HTML  - ganti:
+      <nav class="dock" id="dk"><span class="pill" id="pl"></span></nav>
+    dengan:
+      <nav class="dock" id="dk" aria-label="Navigasi utama"></nav>
+
+[2] CSS   - HAPUS 8 aturan lama berikut (semuanya berada berurutan di <style>):
+      .dock{...}  .pill{...}  .pill.go{...}  .dock button{...}  .dock button.on{...}
+      .dock svg{...}  .dock button.on svg{...}  @keyframes sq{...}
+    lalu tempel BLOK CSS di bawah di tempat yang sama.
+
+[3] JS    - ganti SELURUH baris pembuat tombol yang diawali:
+      keys.forEach((k,i)=>{const b=document.createElement('button');b.innerHTML=...b.onclick=()=>go(i);dk.appendChild(b)});
+    dengan BLOK JS-1 di bawah.
+
+[4] JS    - di dalam function go(i){...}, ganti potongan:
+      [...dk.querySelectorAll('button')].forEach((b,j)=>b.classList.toggle('on',j==i));const p=$('#pl');p.style.transform=`translateX(${i*100}%)`;p.classList.remove('go');void p.offsetWidth;p.classList.add('go');scrollTo(0,0);
+    dengan BLOK JS-2 di bawah.
+====================================================================================================== -->
+
+<!-- ========== BLOK CSS ========== -->
+<style>
+/* ===== Navigasi bawah: "Liquid Glass" (tray kaca + kapsul kaca yang menyala saat dipilih) ===== */
+.dock{--lq-top:rgba(255,255,255,.28);--lq-bot:rgba(255,255,255,.06);--lq-rim:rgba(255,255,255,.8);--lq-edge:rgba(255,255,255,.26);--lq-deep:rgba(0,0,0,.34);--lq-drop:rgba(0,0,0,.42);--lq-core:rgba(0,0,0,.2);--lq-on:#fff;--lq-ts:0 1px 2px rgba(0,0,0,.35);--lq-txt:var(--mute);position:fixed;z-index:20;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(calc(100% - 20px),440px);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:8px;border-radius:36px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.04)),var(--dock);border:1px solid var(--lq-edge);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);will-change:transform;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -3px 8px var(--lq-deep),0 22px 44px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.25)}
+:root[data-theme="light"] .dock{--lq-top:rgba(255,255,255,.98);--lq-bot:rgba(255,255,255,.5);--lq-rim:#fff;--lq-edge:rgba(40,55,120,.16);--lq-deep:rgba(40,55,120,.2);--lq-drop:rgba(40,55,120,.26);--lq-core:rgba(255,255,255,.62);--lq-on:#14204a;--lq-ts:0 1px 0 rgba(255,255,255,.75);--lq-txt:#586089;box-shadow:inset 0 1.5px 0 #fff,inset 0 -3px 8px var(--lq-deep),0 18px 38px rgba(40,55,120,.24),0 2px 6px rgba(40,55,120,.14)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .dock{--lq-top:rgba(255,255,255,.98);--lq-bot:rgba(255,255,255,.5);--lq-rim:#fff;--lq-edge:rgba(40,55,120,.16);--lq-deep:rgba(40,55,120,.2);--lq-drop:rgba(40,55,120,.26);--lq-core:rgba(255,255,255,.62);--lq-on:#14204a;--lq-ts:0 1px 0 rgba(255,255,255,.75);--lq-txt:#586089;box-shadow:inset 0 1.5px 0 #fff,inset 0 -3px 8px var(--lq-deep),0 18px 38px rgba(40,55,120,.24),0 2px 6px rgba(40,55,120,.14)}}
+.dock .lq{--lcr:77,107,255;position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;height:64px;padding:6px 0 7px;border-radius:999px;border:1px solid var(--lq-edge);background:linear-gradient(180deg,var(--lq-top),var(--lq-bot));color:var(--lq-txt);font:700 clamp(9px,2.7vw,10.5px)/1.1 Manrope,sans-serif;letter-spacing:-.1px;cursor:pointer;box-shadow:inset 0 1.5px 1px var(--lq-rim),inset 0 -3px 5px var(--lq-deep),0 5px 9px var(--lq-drop);transition:transform .5s cubic-bezier(.3,1.5,.45,1),box-shadow .45s,color .3s,border-color .3s}
+.dock .lq>*{position:relative;z-index:2}
+.dock .lq::before{content:"";position:absolute;z-index:1;left:12%;right:12%;top:3px;height:42%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0));opacity:.5;pointer-events:none;transition:opacity .4s}
+.dock .lq::after{content:"";position:absolute;z-index:-1;inset:-1px;border-radius:inherit;pointer-events:none;opacity:0;transform:scale(.6);background:radial-gradient(120% 85% at 50% 38%,var(--lq-core) 0%,rgba(var(--lcr),.55) 52%,rgba(var(--lcr),.98) 100%);transition:opacity .35s,transform .55s cubic-bezier(.3,1.4,.45,1)}
+.dock .lq.on{color:var(--lq-on);border-color:rgba(255,255,255,.65);transform:translateY(-4px);text-shadow:var(--lq-ts);box-shadow:inset 0 2px 1px rgba(255,255,255,.9),inset 0 -4px 9px rgba(var(--lcr),.55),inset 0 0 16px rgba(255,255,255,.28),0 0 18px rgba(var(--lcr),.7),0 10px 20px rgba(var(--lcr),.5)}
+.dock .lq.on::before{opacity:.85}
+.dock .lq.on::after{opacity:1;transform:none;filter:saturate(1.3)}
+.dock .lq:active{transform:scale(.93)}
+.dock .lq.on:active{transform:translateY(-2px) scale(.95)}
+.dock .lq:focus-visible{outline:2px solid rgba(var(--lcr),.95);outline-offset:3px}
+.dock .lq svg{flex:0 0 auto;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.dock .lq.on svg{transform:translateY(-1px) scale(1.12)}
+.dock .lqd{flex:0 0 auto;display:flex;gap:2.5px;height:3px;opacity:.55;transition:opacity .3s}
+.dock .lqd em{display:block;width:3px;height:3px;border-radius:50%;background:currentColor;font-style:normal}
+.dock .lq.on .lqd{opacity:.9}
+@keyframes lqpress{0%{transform:translateY(0) scale(1)}22%{transform:translateY(2px) scale(.9,.94);filter:blur(.7px)}58%{transform:translateY(-9px) scale(1.07,1.05);filter:blur(0)}100%{transform:translateY(-4px) scale(1)}}
+@keyframes lqfill{0%{opacity:0;transform:scale(.55);filter:saturate(1.1)}55%{opacity:1;transform:scale(1.05);filter:saturate(1.9) brightness(.9)}100%{opacity:1;transform:none;filter:saturate(1.3)}}
+.dock .lq.liq{animation:lqpress .62s cubic-bezier(.3,1.15,.45,1)}
+.dock .lq.liq::after{animation:lqfill .62s ease-out}
+@media (hover:hover){.dock .lq:not(.on):hover{transform:translateY(-2px);color:var(--tx);box-shadow:inset 0 1.5px 1px var(--lq-rim),inset 0 -3px 5px var(--lq-deep),0 0 14px rgba(var(--lcr),.35),0 7px 12px var(--lq-drop)}}
+@media (min-width:700px){.dock{width:min(calc(100% - 40px),520px)}.dock .lq{height:68px;font-size:11.5px}}
+@media (min-width:900px){.dock{width:auto;grid-template-columns:repeat(6,1fr);gap:8px;padding:9px;bottom:calc(20px + env(safe-area-inset-bottom,0px))}.dock .lq span{flex:1;text-align:center}.dock .lq{flex-direction:row;justify-content:flex-start;height:52px;min-width:124px;padding:0 18px 0 16px;gap:10px;font-size:13px;letter-spacing:0}.dock .lq .lqd{order:3;margin-left:auto}.dock .lq svg{width:21px;height:21px}.dock .lq.on{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.dock .lq,.dock .lq::before,.dock .lq::after{animation:none!important;transition:none!important}}
+</style>
+
+<!-- ========== BLOK JS-1 (pembuat tombol) ========== -->
+<script>
+const LQ=['59,130,246','139,92,246','255,59,78','255,159,26','34,199,232','255,79,154'];keys.forEach((k,i)=>{const b=document.createElement('button');b.type='button';b.className='lq';b.style.setProperty('--lcr',LQ[i]);b.innerHTML=`<i class="lqd" aria-hidden="true"><em></em><em></em><em></em></i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ic[k]}"/></svg><span>${names[i]}</span>`;b.onclick=()=>go(i);dk.appendChild(b)});
+</script>
+
+<!-- ========== BLOK JS-2 (di dalam go(i), menggantikan potongan lama) ========== -->
+<script>
+const first=!dk.dataset.rdy;dk.dataset.rdy='1';[...dk.querySelectorAll('button')].forEach((b,j)=>{const on=j==i;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');b.classList.remove('liq');if(on&&!first){void b.offsetWidth;b.classList.add('liq')}});scrollTo(0,0);
+</script>
